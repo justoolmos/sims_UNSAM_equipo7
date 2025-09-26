@@ -3,6 +3,7 @@ program MC
         T = 300
         beta = 1/(k_b*T)
 
+
         A = get_matrix_rand(N) !NxN 1 y -1 asignados aleatoriamente
         A = load_matrix(dir)   !opcionalmente carga la matriz desde un archivo
         
