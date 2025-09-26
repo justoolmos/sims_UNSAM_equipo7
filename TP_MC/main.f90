@@ -40,7 +40,7 @@ program MC
 
                 if(i%1000) then       !ver como se hace en fortran
                         
-                        write(..., E_tot)   ! !se guardan la energia actual y el promedio hasta este paso, etc 
+                        write(20, "(f1,f2,f3)") E_tot, ,   ! !se guardan la energia actual y el promedio hasta este paso, etc 
                                             ! !puede ser en el mismo archivo
                         write(..., E_med/i)
                         write(..., M_tot...)
