@@ -3,19 +3,21 @@ program MC
         use ising_mc
         use ziggurat
         implicit none
-
         real :: T, r, E_tot, E_med, E_sqr, M_tot, M_med, M_sqr, dE, beta
         integer :: N, x, y, n_steps,s_k,i
         integer, allocatable :: A(:,:)
            
         T = 10.0
         beta = 1/T
-        N = 20
+        N = 5
         n_steps = 10
 
         A = get_matrix_rand(N) !NxN 1 y -1 asignados aleatoriamente
-       !A = load_matrix(dir)   !opcionalmente carga la matriz desde un archivo
-        
+        call save_matrix(A,'matriz_inicial.dat')
+        print *, '==========' 
+        call load_matrix(A,N,'matriz_inicial.dat')   !opcionalmente carga la matriz desde un archivo
+        call print_matrix(A)
+        print *, '==========' 
         E_tot = get_total_energy(A)   !energia computada con una matriz entera
         E_med = 0
         E_sqr = 0
@@ -55,7 +57,7 @@ program MC
                         write(10,*) i,",",E_tot,",",E_med/i,",",E_sqr/i,",",M_tot,",",M_med/i,",",M_sqr/i    ! !se guardan la energia actual y el promedio hasta este paso, etc 
                                             ! !puede ser en el mismo archivo
                                              
-                !        save_matrix(dir,A)  !guardar la matriz
+                      call save_matrix(A,'matriz1.dat')  !guardar la matriz
                 end if
         end do
 end program MC
