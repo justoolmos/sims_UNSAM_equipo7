@@ -11,11 +11,11 @@ program MC
         beta = 1/T
         N = 5
         n_steps = 10
-
-        A = get_matrix_rand(N) !NxN 1 y -1 asignados aleatoriamente
+        
+        call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
         call save_matrix(A,'matriz_inicial.dat')
         print *, '==========' 
-        call load_matrix(A,N,'matriz_inicial.dat')   !opcionalmente carga la matriz desde un archivo
+        !call load_matrix(A,N,'matriz_inicial.dat')   !opcionalmente carga la matriz desde un archivo
         call print_matrix(A)
         print *, '==========' 
         E_tot = get_total_energy(A)   !energia computada con una matriz entera
@@ -30,6 +30,7 @@ program MC
         do i=1,n_steps  
                 x = int(uni()*N)+1  !elegimos una posicion aleatoria
                 y = int(uni()*N)+1
+                print *, x, y
                 s_k = A(x,y)
                 dE = get_dE(x,y,A,s_k)  !calcula el delta E por cambiar el spin de posicion x,y de M,
                                              !devuelve dE y el valor s_k antes del cambio
@@ -46,18 +47,23 @@ program MC
                                 M_tot = M_tot + (-2*s_k)
                         end if
                 end if
-                
+                !actualizamos las filas y columnas de condicion periodica
+                A(0,:) = A(N,:)
+                A(N+1,:) = A(1,:)
+                A(:,0) = A(:,N)
+                A(:,N+1) = A(:,1)
+
                 E_med = E_med + E_tot
                 M_med = M_med + M_tot
                 E_sqr = E_sqr + (E_tot*E_tot)
                 M_sqr = M_sqr + (M_tot*M_tot)
                 call print_matrix(A)
+                call save_matrix(A,'matriz1.dat')  !guardar la matriz
                 if (MOD(i,1) == 0) then       
 
                         write(10,*) i,",",E_tot,",",E_med/i,",",E_sqr/i,",",M_tot,",",M_med/i,",",M_sqr/i    ! !se guardan la energia actual y el promedio hasta este paso, etc 
                                             ! !puede ser en el mismo archivo
                                              
-                      call save_matrix(A,'matriz1.dat')  !guardar la matriz
                 end if
         end do
 end program MC
