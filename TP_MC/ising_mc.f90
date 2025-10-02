@@ -7,9 +7,8 @@ subroutine get_matrix_rand(matrix,N)
         implicit none
         integer, intent(in) :: N
         integer :: i,j
-        integer, allocatable, intent(out) :: matrix(:,:)
+        integer, intent(inout) :: matrix(0:,0:)
 
-        allocate(matrix(0:N+1,0:N+1))
         matrix = 0
         do j=1,N
                 do i=1,N
@@ -22,17 +21,17 @@ subroutine get_matrix_rand(matrix,N)
                 end do
         end do
 
-        matrix(0,:) = matrix(N,:)
-        matrix(N+1,:) = matrix(1,:)
-        matrix(:,0) = matrix(:,N)
-        matrix(:,N+1) = matrix(:,1)
+        matrix(0,1:N) = matrix(N,1:N)
+        matrix(N+1,1:N) = matrix(1,1:N)
+        matrix(1:N,0) = matrix(1:N,N)
+        matrix(1:N,N+1) = matrix(1:N,1)
         
 end subroutine get_matrix_rand
 
 
 function get_total_energy(A) result(E)
         
-        integer, intent(in) :: A(:,:)
+        integer, intent(in) :: A(0:,0:)
         real :: E
         integer :: i,j,l,s
 
@@ -51,7 +50,7 @@ end function get_total_energy
 
 function get_total_mag(A) result(M)
 
-        integer, intent(in) :: A(:,:)
+        integer, intent(in) :: A(0:,0:)
         real :: M
         integer :: l
         
@@ -62,7 +61,7 @@ end function get_total_mag
 
 function get_dE(x,y,A,s_k) result(dE)
 
-        integer, intent(in) :: x,y,A(:,:),s_k
+        integer, intent(in) :: x,y,A(0:,0:),s_k
         real :: dE
 
         dE = 2*(s_k*A(x+1,y) + s_k*A(x,y+1) + s_k*A(x-1,y) + s_k*A(x,y-1))
@@ -70,19 +69,31 @@ end function get_dE
         
 
 subroutine print_matrix(A)
-        integer, intent(in) :: A(:,:)
+        integer, intent(in) :: A(0:,0:)
         integer :: l,i
 
-        l = size(A,1)    !N
-        do i=1,l-2
-                write(*,"(*(I3))") A(i,1:l-2)   !*(I3) significa entero de 3 digitios, el * es para repetirlo cuanto haga falta
+        l = size(A,1)-2    !N
+        do i=1,l
+                write(*,"(*(I3))") A(i,1:l)   !*(I3) significa entero de 3 digitios, el * es para repetirlo cuanto haga falta
         end do
         print *, " "
 end subroutine print_matrix
 
+
+subroutine print_matrix_full(A)
+        integer, intent(in) :: A(0:,0:)
+        integer :: l,i
+
+        l = size(A,1)    !N
+        do i=0,l-1
+                write(*,"(*(I3))") A(i,:)   !*(I3) significa entero de 3 digitios, el * es para repetirlo cuanto haga falta
+        end do
+        print *, " "
+end subroutine print_matrix_full
+
 subroutine save_matrix(A, fname)
   implicit none
-  integer, intent(in) :: A(:,:)
+  integer, intent(in) :: A(0:,0:)
   character(*), intent(in) :: fname
   integer :: u, i, l
   l = size(A,1)
@@ -96,14 +107,13 @@ end subroutine save_matrix
 
 subroutine load_matrix(A, n, fname)
   implicit none
-  integer, allocatable, intent(out) :: A(:,:)
+  integer, intent(inout) :: A(0:,0:)
   integer, intent(in) :: n
   character(*), intent(in) :: fname
   integer :: u, i
 
   open(newunit=u, file=fname, status="old", action="read")
 
-  allocate(A(0:n+1,0:n+1))
   do i = 0 , n+1
      read(u,*) A(i, :)
   end do

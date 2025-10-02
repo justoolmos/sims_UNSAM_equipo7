@@ -11,13 +11,12 @@ program MC
         beta = 1/T
         N = 5
         n_steps = 10
-        
+
+        allocate(A(0:N+1,0:N+1))  !A tiene que ser alocado antes de get_matrix_rand o de load_matrix
         call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
         call save_matrix(A,'matriz_inicial.dat')
-        print *, '==========' 
         !call load_matrix(A,N,'matriz_inicial.dat')   !opcionalmente carga la matriz desde un archivo
-        call print_matrix(A)
-        print *, '==========' 
+        call print_matrix_full(A)
         E_tot = get_total_energy(A)   !energia computada con una matriz entera
         E_med = 0
         E_sqr = 0
@@ -48,16 +47,16 @@ program MC
                         end if
                 end if
                 !actualizamos las filas y columnas de condicion periodica
-                A(0,:) = A(N,:)
-                A(N+1,:) = A(1,:)
-                A(:,0) = A(:,N)
-                A(:,N+1) = A(:,1)
+                A(0,1:N) = A(N,1:N)
+                A(N+1,1:N) = A(1,1:N)
+                A(1:N,0) = A(1:N,N)
+                A(1:N,N+1) = A(1:N,1)
 
                 E_med = E_med + E_tot
                 M_med = M_med + M_tot
                 E_sqr = E_sqr + (E_tot*E_tot)
                 M_sqr = M_sqr + (M_tot*M_tot)
-                call print_matrix(A)
+                call print_matrix_full(A)
                 call save_matrix(A,'matriz1.dat')  !guardar la matriz
                 if (MOD(i,1) == 0) then       
 
