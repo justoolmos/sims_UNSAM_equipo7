@@ -27,6 +27,7 @@ program MC
         M_med = 0
         M_sqr = 0
         
+        open(unit=30, file="matrix_out.dat", status = "new", action="write")
         open(unit = 10, file="out.dat", status = "replace", action = "write")
         write(10,*) "Paso,E_tot,E_med,E_sqr,M_tot,M_med,M_sqr"
         do i=1,n_steps  
@@ -61,9 +62,12 @@ program MC
                 if (MOD(i,100) == 0) then       
                         call save_matrix(A,'matriz1.dat')  !guardar la matriz
                         write(10,*) i,",",E_tot,",",E_med/i,",",E_sqr/i,",",M_tot,",",M_med/i,",",M_sqr/i    ! !se guardan la energia actual y el promedio hasta este paso, etc 
-                                            ! !puede ser en el mismo archivo
-                                             
+                end if
+                if(mod(i,1000)==0) then
+                        write(30,*) A
                 end if
         end do
+        close(10)
+        close(30)
 end program MC
 
