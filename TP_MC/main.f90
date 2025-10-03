@@ -9,8 +9,8 @@ program MC
            
         T = 10.0
         beta = 1/T
-        N = 5
-        n_steps = 10
+        N = 30
+        n_steps = 10000
 
         allocate(A(0:N+1,0:N+1))  !A tiene que ser alocado antes de get_matrix_rand o de load_matrix
         call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
