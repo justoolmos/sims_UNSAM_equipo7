@@ -3,20 +3,23 @@ program MC
         use ising_mc
         use ziggurat
         implicit none
-        real :: T, r, E_tot, E_med, E_sqr, M_tot, M_med, M_sqr, dE, beta
+        integer, parameter :: dp = selected_real_kind(15, 307)
+        real(kind=dp) :: T, r, E_tot, E_med, E_sqr, M_tot, M_med, M_sqr, dE, beta
         integer :: N, x, y, n_steps,s_k,i
         integer, allocatable :: A(:,:)
            
-        T = 10.0
+        open(unit=30, file="in.dat", status="old", action="read")
+        read(30,*) T,N,n_steps
+        close(30)
+
         beta = 1/T
-        N = 30
-        n_steps = 10000
+        
 
         allocate(A(0:N+1,0:N+1))  !A tiene que ser alocado antes de get_matrix_rand o de load_matrix
-        call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
-        call save_matrix(A,'matriz_inicial.dat')
-        !call load_matrix(A,N,'matriz_inicial.dat')   !opcionalmente carga la matriz desde un archivo
-        call print_matrix_full(A)
+        !call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
+        !call save_matrix(A,'matriz_inicial.dat')
+        call load_matrix(A,N,'matriz1.dat')   !opcionalmente carga la matriz desde un archivo
+        !call print_matrix_full(A)
         E_tot = get_total_energy(A)   !energia computada con una matriz entera
         E_med = 0
         E_sqr = 0
@@ -29,7 +32,6 @@ program MC
         do i=1,n_steps  
                 x = int(uni()*N)+1  !elegimos una posicion aleatoria
                 y = int(uni()*N)+1
-                print *, x, y
                 s_k = A(x,y)
                 dE = get_dE(x,y,A,s_k)  !calcula el delta E por cambiar el spin de posicion x,y de M,
                                              !devuelve dE y el valor s_k antes del cambio
@@ -56,10 +58,8 @@ program MC
                 M_med = M_med + M_tot
                 E_sqr = E_sqr + (E_tot*E_tot)
                 M_sqr = M_sqr + (M_tot*M_tot)
-                call print_matrix_full(A)
-                call save_matrix(A,'matriz1.dat')  !guardar la matriz
-                if (MOD(i,1) == 0) then       
-
+                if (MOD(i,100) == 0) then       
+                        call save_matrix(A,'matriz1.dat')  !guardar la matriz
                         write(10,*) i,",",E_tot,",",E_med/i,",",E_sqr/i,",",M_tot,",",M_med/i,",",M_sqr/i    ! !se guardan la energia actual y el promedio hasta este paso, etc 
                                             ! !puede ser en el mismo archivo
                                              

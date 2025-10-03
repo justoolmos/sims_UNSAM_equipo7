@@ -42,7 +42,7 @@ function get_total_energy(A) result(E)
                 do i=1,l
 
                         s = A(i,j)
-                        E = E + s*A(i-1,j) + s*A(i,j+1)
+                        E = E + -(s*A(i-1,j) + s*A(i,j+1))
                 end do
         end do
 end function get_total_energy
