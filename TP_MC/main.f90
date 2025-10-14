@@ -7,7 +7,8 @@ program MC
         real(kind=dp) :: T, r, E_tot, E_med, E_sqr, M_tot, M_med, M_sqr, dE, beta, acept
         integer :: N, x, y, n_steps,s_k,i
         integer, allocatable :: A(:,:)
-           
+        logical :: start
+
         open(unit=30, file="in.dat", status="old", action="read")
         read(30,*) T,N,n_steps
         close(30)
@@ -16,8 +17,14 @@ program MC
         
 
         allocate(A(0:N+1,0:N+1))  !A tiene que ser alocado antes de get_matrix_rand o de load_matrix
-        !call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
-        call load_matrix(A,N,'matriz1.dat')   !opcionalmente carga la matriz desde un archivo
+        inquire(file="matriz.dat",exist=start)
+
+        if(start) then
+                call load_matrix(A,N,'matriz.dat')   !opcionalmente carga la matriz desde un archivo
+        else 
+                call get_matrix_rand(A,N) !NxN 1 y -1 asignados aleatoriamente
+        end if
+
         E_tot = get_total_energy(A)   !energia computada con una matriz entera
         E_med = 0
         E_sqr = 0
@@ -26,7 +33,7 @@ program MC
         M_sqr = 0
         acept = 0
         
-        open(unit=30, file="matrix_out.dat", status = "new", action="write")
+        open(unit=30, file="matrix_out.dat", status = "replace", action="write")
         open(unit = 10, file="out.dat", status = "replace", action = "write")
         write(10,*)"Paso,E_tot,E_med,E_sqr,M_tot,M_med,M_sqr,acept_ratio"
         do i=1,n_steps  
@@ -61,7 +68,7 @@ program MC
                 E_sqr = E_sqr + (E_tot*E_tot)
                 M_sqr = M_sqr + (M_tot*M_tot)
                 if (MOD(i,10000) == 0) then       
-                        call save_matrix(A,'matriz1.dat')  !guardar la matriz
+                        call save_matrix(A,'matriz.dat')  !guardar la matriz
                         write(10,*) i,",",E_tot,",",E_med/i,",",E_sqr/i,",",M_tot,",",M_med/i,",",M_sqr/i,",",acept/i    ! !se guardan la energia actual y el promedio hasta este paso, etc 
                 end if
                 if(mod(i,10000)==0) then
