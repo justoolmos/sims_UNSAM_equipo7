@@ -15,10 +15,10 @@ subroutine init_coords()
         end do
 end subroutine init_coords
 
-subroutine update_E_and_F() 
+function update_E_and_F() result(p) 
         integer :: i,j
-        real(kind=8) :: r_ij(3), norm, ex, v_ij
-        
+        real(kind=8) :: r_ij(3), norm, ex, v_ij, p
+        p = 0.0 
         E_tot = 0.0
         F = 0.0
         do i=1,N-1
@@ -44,13 +44,27 @@ subroutine update_E_and_F()
                                 F(:,i) = F(:,i) - F_esc*r_ij
                                 F(:,j) = F(:,j) + F_esc*r_ij
                                 !F(:,i) = F(:,i)-(r(:,i)*(4.0*eps*(6*ex-12*ex*ex))/norm**2)
-                                !F(:,j) = F(:,j)-(r(:,j)*(4.0*eps*(6*ex-12*ex*ex))/norm**2)        
+                                !F(:,j) = F(:,j)-(r(:,j)*(4.0*eps*(6*ex-12*ex*ex))/norm**2)
+                                p = p + dot_product(r_ij,F_esc*r_ij)
                         end if
                 end do
         end do
+        p = N*get_T()/(L**3) + 1.0/(3*L**3)*p
 
-end subroutine update_E_and_F
-                                     
+end function update_E_and_F
+
+subroutine update_lgv_F()
+        real(kind=8) :: rand_dev
+
+        rand_dev = sqrt(2.0*lgv_gam*m*T/dt)
+        F = F - lgv_gam*v*m
+        do i=1,N
+                do j=1,3
+                        F(j,i) = F(j,i) + rand_dev*rnor()
+                end do
+        end do
+end subroutine update_lgv_F
+
 subroutine pbc()
         r = r - L*floor(r/L)
 end subroutine pbc       
@@ -59,12 +73,13 @@ function E_minimization(steps, stride) result(Es)
         integer, intent(in) :: steps, stride
         real(kind=8), allocatable :: Es(:)
         character :: fname(14)
+        real(kind=8) :: dummy
         allocate(Es(int(steps/stride)))
 
         do i=1,steps
                 r = r + 0.5*(F/m)*dt**2
                 call pbc
-                call update_E_and_F
+                dummy = update_E_and_F()
 
                 if (MOD(i,stride) == 0.0) then
                         fname = "coords_min.xyz"
@@ -96,14 +111,17 @@ subroutine save_coords(filename)
 end subroutine save_coords
 
 
-subroutine integrate()
+function integrate() result(p_inst)
+        real(kind=8) :: p_inst
+
         !asume que la fuerza del paso anterior ya fue calculada
         r = r + v*dt + 0.5*(F/m)*dt**2
         call pbc()
         v = v + 0.5*F*dt/m
-        call update_E_and_F
+        p_inst = update_E_and_F()
+        call update_lgv_F()
         v = v + 0.5*F*dt/m
-end subroutine integrate
+end function integrate
 
 subroutine initiate_velocities()
         v = 0.0
