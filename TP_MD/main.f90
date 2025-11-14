@@ -19,16 +19,15 @@ program main
         end if
 
         call zigset(seed)
+
+        open(unit=30, file="in.dat", status="old", action="read")
+        read(30,*) T,rho,L,n_steps,dt
+        close(30)
        
-        
-        rho = 0.2*sigma**(-3)
-        L = 10.0
         N = rho*(L**3)
         print *, N
         r_cut = sigma*2.5
         v_cut = 4*eps*(-(sigma/r_cut)**6+(sigma/r_cut)**12)
-        dt = 0.01
-        T = 3.0
 
 
         allocate(r(3,N))
@@ -46,9 +45,9 @@ program main
         open(unit=10, file = "produccion.dat", action="write", status="replace", form="formatted")
         write(10,"(A34)") "step,E total,Ep,Ek,F max,v max,T,p"
 
-        do i=1,10000
+        do i=1,n_steps
                 call integrate()
-                if(mod(i,10)==0) then
+                if(mod(i,100)==0) then
                         Ek = get_Ek()
                         write(10,"(I5,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8)") &
                         i,",",E_tot+Ek,",",E_tot,",",Ek,",",maxval(F),",",maxval(v),",",T_inst,",",p_inst
