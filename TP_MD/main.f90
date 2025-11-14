@@ -36,22 +36,22 @@ program main
         allocate(F(3,N))
 
         call init_coords()
-        p_in = update_E_and_F()
+        call update_E_and_F()
         call update_lgv_F()
         
         Es_min = E_minimization(5000,1)
         call initiate_velocities()
-        
+        T_inst = get_T()
+
         open(unit=10, file = "produccion.dat", action="write", status="replace", form="formatted")
         write(10,"(A34)") "step,E total,Ep,Ek,F max,v max,T,p"
 
         do i=1,10000
-                p = integrate()
+                call integrate()
                 if(mod(i,10)==0) then
                         Ek = get_Ek()
-                        inst_T = get_T()
                         write(10,"(I5,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8,A1,f16.8)") &
-                        i,",",E_tot+Ek,",",E_tot,",",Ek,",",maxval(F),",",maxval(v),",",inst_T,",",p
+                        i,",",E_tot+Ek,",",E_tot,",",Ek,",",maxval(F),",",maxval(v),",",T_inst,",",p_inst
                         write(*,"(A6,I5)") "step: ", i
                         print *, E_tot + Ek 
                         call save_coords("produccion.xyz")

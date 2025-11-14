@@ -15,7 +15,7 @@ subroutine init_coords()
         end do
 end subroutine init_coords
 
-function update_E_and_F() result(p) 
+subroutine update_E_and_F() 
         integer :: i,j
         real(kind=8) :: r_ij(3), norm, ex, v_ij, p
         p = 0.0 
@@ -49,9 +49,9 @@ function update_E_and_F() result(p)
                         end if
                 end do
         end do
-        p = N*get_T()/(L**3) + 1.0/(3*L**3)*p
+        p_inst = N*get_T()/(L**3) + 1.0/(3*L**3)*p
 
-end function update_E_and_F
+end subroutine update_E_and_F
 
 subroutine update_lgv_F()
         real(kind=8) :: rand_dev
@@ -73,13 +73,12 @@ function E_minimization(steps, stride) result(Es)
         integer, intent(in) :: steps, stride
         real(kind=8), allocatable :: Es(:)
         character :: fname(14)
-        real(kind=8) :: dummy
         allocate(Es(int(steps/stride)))
 
         do i=1,steps
                 r = r + 0.5*(F/m)*dt**2
                 call pbc
-                dummy = update_E_and_F()
+                call update_E_and_F()
 
                 if (MOD(i,stride) == 0.0) then
                         fname = "coords_min.xyz"
@@ -111,17 +110,17 @@ subroutine save_coords(filename)
 end subroutine save_coords
 
 
-function integrate() result(p_inst)
-        real(kind=8) :: p_inst
+subroutine integrate() 
 
         !asume que la fuerza del paso anterior ya fue calculada
         r = r + v*dt + 0.5*(F/m)*dt**2
         call pbc()
         v = v + 0.5*F*dt/m
-        p_inst = update_E_and_F()
+        call update_E_and_F()
         call update_lgv_F()
         v = v + 0.5*F*dt/m
-end function integrate
+        T_inst = get_T()
+end subroutine integrate
 
 subroutine initiate_velocities()
         v = 0.0
