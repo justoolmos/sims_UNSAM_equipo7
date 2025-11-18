@@ -45,7 +45,7 @@ subroutine update_E_and_F()
                                 F(:,j) = F(:,j) + F_esc*r_ij
                                 !F(:,i) = F(:,i)-(r(:,i)*(4.0*eps*(6*ex-12*ex*ex))/norm**2)
                                 !F(:,j) = F(:,j)-(r(:,j)*(4.0*eps*(6*ex-12*ex*ex))/norm**2)
-                                p = p + dot_product(r_ij,F_esc*r_ij)
+                                p = p + dot_product(r_ij,-F_esc*r_ij)
                         end if
                 end do
         end do
